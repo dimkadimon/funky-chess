@@ -1,0 +1,12 @@
+{
+  "name": "funky-chess",
+  "version": "1.0.0",
+  "description": "Funky Chess - Chess with creative variants!",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
