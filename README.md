@@ -34,3 +34,7 @@ Chess with creative twists! Play against an AI opponent with four unique game va
 ## 🛠️ Run Locally
 
 Simply open `index.html` in a browser. No build step required.
+
+## 📝 License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

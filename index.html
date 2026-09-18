@@ -48,7 +48,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
 #title-screen{background:var(--bg);overflow:auto;padding:30px 20px 20px;}
 .logo{font-family:'Fredoka',sans-serif;font-size:clamp(2.4rem,7vw,4.5rem);font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3.5s ease-in-out infinite;line-height:1.1;}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
 .subtitle{font-size:clamp(0.7rem,2vw,0.95rem);color:var(--accent3);margin:0 0 1.4rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.85;}
 .section{margin:0.5rem 0;text-align:center;width:100%;max-width:440px;}
 .section label{display:block;font-size:0.68rem;color:var(--accent);margin-bottom:0.3rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
@@ -100,10 +100,12 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .sq .wrap-right{position:absolute;right:1px;top:50%;transform:translateY(-50%);font-size:0.65rem;opacity:0.55;pointer-events:none;z-index:4;color:var(--accent);}
 
 /* Teleport squares */
-.sq.tp{background:var(--sq-tp-bg) !important;animation:tp-pulse 1.5s ease-in-out infinite;}
+.sq.tp{background:var(--sq-tp-bg) !important;animation:tp-pulse 1.5s ease-in-out infinite;overflow:hidden;}
 .sq.tp::before{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid var(--sq-tp-glow);animation:tp-ring 1.5s ease-in-out infinite;pointer-events:none;}
+.sq.tp::after{content:'';position:absolute;inset:2px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0%,rgba(60,140,255,0.4) 25%,transparent 50%,rgba(60,140,255,0.4) 75%,transparent 100%);animation:tp-swirl 3s linear infinite;pointer-events:none;opacity:0.7;}
 @keyframes tp-pulse{0%,100%{box-shadow:inset 0 0 8px var(--sq-tp-glow)}50%{box-shadow:inset 0 0 20px var(--sq-tp-glow)}}
 @keyframes tp-ring{0%,100%{transform:scale(0.7);opacity:1}50%{transform:scale(1);opacity:0.4}}
+@keyframes tp-swirl{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* Wall squares */
 .sq.wl{cursor:default;background:repeating-linear-gradient(45deg,var(--sq-wall-bg) 0,var(--sq-wall-bg) 7px,var(--sq-wall-fg) 7px,var(--sq-wall-fg) 14px)!important;}
@@ -115,6 +117,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .pb{color:#111;-webkit-text-fill-color:#111;-webkit-text-stroke:0.5px #555;}
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
+[data-theme="light"] .status{color:var(--text);}
 
 .end-bar{display:none;align-items:center;justify-content:center;gap:10px;padding:6px 8px;background:rgba(0,0,0,0.85);border-radius:var(--r);margin-top:2px;flex-wrap:wrap;}
 .end-bar.on{display:flex;}
@@ -198,7 +201,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.4.0</div>
+  <div class="version">v1.5.0</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
