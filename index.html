@@ -709,7 +709,7 @@ function showEnd(){
     else{t.textContent='😞 You Lose';m.textContent='Checkmate! Better luck next time.';sndLose();}
   }else if(!legal.length&&!inC){
     t.textContent='🤝 Stalemate';
-    m.textContent=s.turn===s.pColor?'You have no legal moves — it's a draw!':'AI has no legal moves — it's a draw!';
+    m.textContent=s.turn===s.pColor?"You have no legal moves \u2014 it\u2019s a draw!":"AI has no legal moves \u2014 it\u2019s a draw!";
   }else if(s.hm>=100){
     t.textContent='🤝 Draw';m.textContent='50-move rule — too many moves without captures or pawn pushes.';
   }else if(is3fold(s)){
