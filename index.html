@@ -28,7 +28,7 @@
 [data-theme="light"]{
   --bg:#b8a88c;--bg2:#a89878;--card:rgba(255,255,255,0.08);
   --accent:#c94070;--accent2:#8020c0;--accent3:#1070b0;
-  --gold:#a08000;--text:#1a1028;--muted:rgba(26,16,40,0.5);
+  --gold:#6b5500;--text:#1a1028;--muted:rgba(26,16,40,0.72);
   --sq-sel:rgba(16,112,176,0.45);--sq-move:rgba(16,112,176,0.35);--sq-cap:rgba(200,40,40,0.45);
   --sq-last:rgba(220,50,50,0.45);
   --sq-wall-bg:#7a5a3a;--sq-wall-fg:#4a3520;
@@ -46,7 +46,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 
 .screen{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .3s,transform .3s;}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
-#title-screen{background:var(--bg);overflow:auto;padding:20px;}
+#title-screen{background:var(--bg);overflow:auto;padding:30px 20px 20px;}
 .logo{font-family:'Fredoka',sans-serif;font-size:clamp(2.4rem,7vw,4.5rem);font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3.5s ease-in-out infinite;line-height:1.1;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .subtitle{font-size:clamp(0.7rem,2vw,0.95rem);color:var(--accent3);margin:0 0 1.4rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;opacity:.85;}
@@ -159,7 +159,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
   .btn{padding:8px 12px;font-size:0.72rem;min-height:40px;}
   .btn-go{padding:12px 28px;font-size:1rem;min-height:48px;}
   .pinfo{padding:3px 7px;font-size:0.63rem;}
-  .cbtn{width:38px;height:38px;font-size:1rem;}
+  .cbtn{width:44px;height:44px;font-size:1.1rem;}
 }
 </style>
 </head>
@@ -198,7 +198,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.3.0</div>
+  <div class="version">v1.4.0</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
