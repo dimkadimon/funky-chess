@@ -6,7 +6,7 @@
 <title>Funky Chess</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
 :root{--r:12px;--sq-l:#f0e4cc;--sq-d:#b58863;}
 
 [data-theme="dark"]{
@@ -44,7 +44,7 @@
 html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
 
 
-.screen{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .3s,transform .3s;}
+.screen{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .3s,transform .3s;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 10px;}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
 #title-screen{background:var(--bg);overflow:auto;padding:20px;}
 .logo{font-family:'Fredoka',sans-serif;font-size:clamp(2.4rem,7vw,4.5rem);font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3.5s ease-in-out infinite;line-height:1.1;}
@@ -148,10 +148,10 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .confirm-box .btn-row{margin-top:16px;}
 
 @media(max-width:420px){
-  .btn{padding:6px 10px;font-size:0.7rem;}
-  .btn-go{padding:11px 28px;font-size:1rem;}
+  .btn{padding:8px 12px;font-size:0.72rem;min-height:40px;}
+  .btn-go{padding:12px 28px;font-size:1rem;min-height:48px;}
   .pinfo{padding:3px 7px;font-size:0.63rem;}
-  .cbtn{width:26px;height:26px;font-size:0.7rem;}
+  .cbtn{width:30px;height:30px;font-size:0.75rem;}
 }
 </style>
 </head>
@@ -238,7 +238,7 @@ let ac=null;
 function initAudio(){if(!ac)try{ac=new AC();}catch(e){}}
 function tone(f,d,t='sine',v=0.1){if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
 const sndMove=()=>tone(520,0.06);
-const sndCap=()=>{tone(200,0.1,'sawtooth',0.08);tone(400,0.07,'sine',0.06);};
+const sndCap=()=>{tone(120,0.15,'sawtooth',0.12);setTimeout(()=>tone(250,0.1,'square',0.07),40);};
 const sndCheck=()=>{tone(600,0.08,'triangle',0.12);setTimeout(()=>tone(900,0.15,'triangle',0.12),80);};
 const sndTP=()=>{tone(300,0.1);setTimeout(()=>tone(600,0.1),70);setTimeout(()=>tone(900,0.08),140);};
 const sndWin=()=>{tone(523,0.1);setTimeout(()=>tone(659,0.1),100);setTimeout(()=>tone(784,0.15),200);};
