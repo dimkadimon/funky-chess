@@ -239,7 +239,7 @@ function initAudio(){if(!ac)try{ac=new AC();}catch(e){}}
 function tone(f,d,t='sine',v=0.1){if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
 const sndMove=()=>tone(520,0.06);
 const sndCap=()=>{tone(200,0.1,'sawtooth',0.08);tone(400,0.07,'sine',0.06);};
-const sndCheck=()=>{tone(880,0.12,'square',0.07);};
+const sndCheck=()=>{tone(600,0.08,'triangle',0.12);setTimeout(()=>tone(900,0.15,'triangle',0.12),80);};
 const sndTP=()=>{tone(300,0.1);setTimeout(()=>tone(600,0.1),70);setTimeout(()=>tone(900,0.08),140);};
 const sndWin=()=>{tone(523,0.1);setTimeout(()=>tone(659,0.1),100);setTimeout(()=>tone(784,0.15),200);};
 const sndLose=()=>{tone(280,0.15,'sawtooth',0.07);setTimeout(()=>tone(180,0.2,'sawtooth',0.07),150);};
@@ -492,8 +492,24 @@ function undoMv(s){if(!s.stack.length)return;Object.assign(s,s.stack.pop());s.hi
 
 // ========== AI ==========
 function evalBd(bd,col){
-  let sc=0;
-  for(let i=0;i<64;i++){const p=bd[i];if(!p)continue;const c=pc(p),t=p.toLowerCase();let v=(VAL[t]||0)+(PST[t]?PST[t][c==='w'?i:flipI(i)]||0:0);sc+=(c===col?v:-v);}
+  let sc=0,wk=-1,bk=-1,wMat=0,bMat=0;
+  for(let i=0;i<64;i++){const p=bd[i];if(!p)continue;const c=pc(p),t=p.toLowerCase();
+    if(t==='k'){if(c==='w')wk=i;else bk=i;continue;}
+    let v=(VAL[t]||0)+(PST[t]?PST[t][c==='w'?i:flipI(i)]||0:0);
+    if(c===col)wMat+=(VAL[t]||0);else bMat+=(VAL[t]||0);
+    sc+=(c===col?v:-v);
+  }
+  // Mop-up: when one side has decisive material advantage, push opponent king to edge
+  const adv=wMat-bMat;const myK=col==='w'?wk:bk,opK=col==='w'?bk:wk;
+  if(opK>=0&&Math.abs(adv)>500){
+    const[or,oc]=i2rc(opK);const[mr,mc]=i2rc(myK);
+    // Opponent king far from center (push to corner)
+    const centerDist=Math.abs(or-3.5)+Math.abs(oc-3.5);
+    sc+=(adv>0?1:-1)*centerDist*12;
+    // Own king close to opponent king
+    const kingDist=Math.abs(or-mr)+Math.abs(oc-mc);
+    sc+=(adv>0?1:-1)*(14-kingDist)*4;
+  }
   return sc;
 }
 
@@ -676,15 +692,25 @@ function runAI(){
 function showEnd(){
   render();
   const s=G;const ov=document.getElementById('ov-end');const t=document.getElementById('end-t'),m=document.getElementById('end-m');
-  const tmp={bd:s.bd,turn:s.turn,cas:s.cas,ep:s.ep,hm:0,fm:0,variant:s.variant,tps:s.tps,walls:s.walls,check:false};
+  const tmp={bd:s.bd,turn:s.turn,cas:s.cas,ep:s.ep,hm:s.hm,fm:s.fm,variant:s.variant,tps:s.tps,walls:s.walls,check:false};
   const legal=genLegal(tmp);const inC=isAttacked(s.bd,findK(s.bd,s.turn),s.turn==='w'?'b':'w',s);
   if(!legal.length&&inC){
     const w=s.turn==='w'?'b':'w';
     if(w===s.pColor){t.textContent='🎉 You Win!';m.textContent='Checkmate! Congratulations!';sndWin();}
     else{t.textContent='😞 You Lose';m.textContent='Checkmate! Better luck next time.';sndLose();}
-  }else{t.textContent='🤝 Draw';m.textContent='The game ended in a draw.';}
+  }else if(!legal.length&&!inC){
+    t.textContent='🤝 Stalemate';
+    m.textContent=s.turn===s.pColor?'You have no legal moves — it's a draw!':'AI has no legal moves — it's a draw!';
+  }else if(s.hm>=100){
+    t.textContent='🤝 Draw';m.textContent='50-move rule — too many moves without captures or pawn pushes.';
+  }else if(isInsuff(s.bd)){
+    t.textContent='🤝 Draw';m.textContent='Insufficient material — neither side can checkmate.';
+  }else{
+    t.textContent='🤝 Draw';m.textContent='The game ended in a draw.';
+  }
   setTimeout(()=>ov.classList.add('on'),1500);
 }
+
 
 // ========== MENU ==========
 document.querySelectorAll('.btn-row').forEach(g=>g.querySelectorAll('.btn').forEach(b=>b.addEventListener('click',()=>{g.querySelectorAll('.btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');})));
