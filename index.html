@@ -78,7 +78,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .cbtn:hover{background:rgba(196,77,255,0.12);border-color:var(--accent);}
 .cbtn:active{transform:scale(0.88);}
 .badge{font-size:0.6rem;padding:2px 8px;border-radius:20px;background:linear-gradient(135deg,var(--accent2),var(--accent3));color:#fff;font-weight:800;letter-spacing:1px;}
-.cap-row{display:flex;gap:1px;min-height:20px;align-items:center;padding:0 6px;max-width:540px;flex-wrap:wrap;font-size:0.72rem;opacity:.6;}
+.cap-row{display:flex;gap:2px;min-height:24px;align-items:center;padding:0 6px;max-width:540px;flex-wrap:wrap;font-size:1.1rem;opacity:.7;}
 #board-wrap{position:relative;touch-action:none;}
 #board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(90vw,90vh - 120px,540px);height:min(90vw,90vh - 120px,540px);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);position:relative;user-select:none;-webkit-user-select:none;}
 
@@ -121,7 +121,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .end-bar h2{font-family:'Fredoka',sans-serif;font-size:1rem;color:var(--gold);margin:0;}
 .end-bar #end-m{font-size:0.75rem;color:var(--accent3);margin:0;}
 .end-btns{display:flex;gap:6px;}
-.end-btns .btn{padding:5px 12px;font-size:0.7rem;}
+.end-btns .btn{padding:5px 12px;font-size:0.7rem;color:#fff;border-color:rgba(255,255,255,0.3);}
 
 /* Overlays */
 .ov{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.88);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;border-radius:0 0 var(--r) var(--r);padding:10px 8px;flex-wrap:wrap;}
@@ -198,7 +198,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.1.0</div>
+  <div class="version">v1.2.0</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
