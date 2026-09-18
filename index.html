@@ -111,9 +111,9 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 .sq.wl .wall-icon{position:absolute;font-size:1.4em;opacity:0.7;z-index:1;pointer-events:none;}
 
 /* Piece styling */
-.pc{font-size:88%;line-height:1;z-index:2;pointer-events:none;}
-.pw{color:#fff;text-shadow:0 0 2px #000,0 0 4px #000,1px 0 0 #000,-1px 0 0 #000,0 1px 0 #000,0 -1px 0 #000;}
-.pb{color:#111;text-shadow:0 0 2px #fff,0 0 4px #fff,1px 0 0 #fff,-1px 0 0 #fff,0 1px 0 #fff,0 -1px 0 #fff;}
+.pc{line-height:1;z-index:2;pointer-events:none;}
+.pw{color:#ffffff;text-shadow:0 0 4px #000,0 0 8px rgba(0,0,0,0.6),2px 0 0 #333,-2px 0 0 #333,0 2px 0 #333,0 -2px 0 #333;}
+.pb{color:#111;text-shadow:0 0 4px #fff,0 0 8px rgba(255,255,255,0.6),2px 0 0 #ddd,-2px 0 0 #ddd,0 2px 0 #ddd,0 -2px 0 #ddd;}
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
 
@@ -675,7 +675,7 @@ function render(){
     const piece=s.bd[ri];
     if(piece){
       const sp=document.createElement('span');
-      sp.className='pc '+(pc(piece)==='w'?'pw':'pb');sp.textContent=UNI[piece];
+      sp.className='pc '+(pc(piece)==='w'?'pw':'pb');sp.textContent=UNI[piece];sp.style.fontSize=fs+'px';
       sq.appendChild(sp);
     }
     sq.addEventListener('click',e=>{e.preventDefault();initAudio();onClick(ri);});
