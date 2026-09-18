@@ -90,8 +90,8 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 .sq.last{background:linear-gradient(var(--sq-last),var(--sq-l)) !important;}
 .sq.last.d{background:linear-gradient(var(--sq-last),var(--sq-d)) !important;}
 .sq.chk{box-shadow:inset 0 0 0 3px #ff0000aa;}
-.sq .dot{position:absolute;width:28%;height:28%;border-radius:50%;background:var(--sq-move);pointer-events:none;}
-.sq .ring{position:absolute;width:80%;height:80%;border-radius:50%;border:4px solid var(--sq-cap);pointer-events:none;}
+.sq .dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:28%;height:28%;border-radius:50%;background:var(--sq-move);pointer-events:none;z-index:3;}
+.sq .ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;border-radius:50%;border:4px solid var(--sq-cap);pointer-events:none;z-index:3;}
 .sq .coord{position:absolute;font-size:0.52rem;font-weight:800;pointer-events:none;opacity:0.4;}
 .sq .coord.file{bottom:1px;right:2px;}
 .sq .coord.rank{top:1px;left:2px;}
