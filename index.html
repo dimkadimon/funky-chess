@@ -83,7 +83,7 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 #board-wrap{position:relative;touch-action:none;}
 #board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(90vw,90vh - 120px,540px);height:min(90vw,90vh - 120px,540px);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);position:relative;user-select:none;-webkit-user-select:none;}
 
-.sq{position:relative;cursor:pointer;transition:background .1s;overflow:hidden;}
+.sq{display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .1s;}
 .sq.l{background:var(--sq-l);}
 .sq.d{background:var(--sq-d);}
 .sq.sel{box-shadow:inset 0 0 0 3px var(--sq-sel);}
@@ -110,7 +110,8 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
   pointer-events:none;}
 .sq.wl .wall-icon{position:absolute;font-size:1.4em;opacity:0.7;z-index:1;pointer-events:none;}
 
-/* Piece styling — span gets inline styles, SVG below */
+/* Piece styling */
+.pc{font-size:88%;line-height:1;z-index:2;pointer-events:none;filter:drop-shadow(1px 1px 1px rgba(0,0,0,0.3));}
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
 
@@ -246,66 +247,12 @@ const sndWin=()=>{tone(523,0.1);setTimeout(()=>tone(659,0.1),100);setTimeout(()=
 const sndLose=()=>{tone(280,0.15,'sawtooth',0.07);setTimeout(()=>tone(180,0.2,'sawtooth',0.07),150);};
 
 // ========== SVG PIECE RENDERER ==========
-function pieceSVG(type, color){
-  const colors = {
-    'w': {fill:'#ffffff', stroke:'#1a1a1a'},
-    'b': {fill:'#1a1a1a', stroke:'#ffffff'}
-  };
-  const c = colors[color] || colors['w'];
-  const sw = 1.5;
-  let d = '';
-  switch(type){
-    case 'K':
-      d=`<line x1="20" y1="6" x2="20" y2="12" stroke="${c.stroke}" stroke-width="${sw}" stroke-linecap="round"/>
-         <line x1="17" y1="9" x2="23" y2="9" stroke="${c.stroke}" stroke-width="${sw}" stroke-linecap="round"/>
-         <path d="M12,38 Q12,28 14,24 Q10,22 10,18 Q10,14 14,13 Q16,12 16,10 Q16,7 20,7 Q24,7 24,10 Q24,12 26,13 Q30,14 30,18 Q30,22 26,24 Q28,28 28,38 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;
-      break;
-    case 'Q':
-      d=`<circle cx="10" cy="8" r="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <circle cx="30" cy="8" r="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <circle cx="20" cy="5" r="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <circle cx="6" cy="14" r="2" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <circle cx="34" cy="14" r="2" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <path d="M10,10 L12,20 Q8,24 10,30 L10,36 Q10,38 12,38 L28,38 Q30,38 30,36 L30,30 Q32,24 28,20 L30,10 Q28,18 20,15 Q12,18 10,10 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;
-      break;
-    case 'R':
-      d=`<path d="M10,10 L10,8 L13,8 L13,11 L17,11 L17,8 L20,8 L23,8 L23,11 L27,11 L27,8 L30,8 L30,10 L30,14 L28,16 L28,34 Q28,38 24,38 L16,38 Q12,38 12,34 L12,16 L10,14 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;
-      break;
-    case 'B':
-      d=`<ellipse cx="20" cy="8" rx="2" ry="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <path d="M20,11 Q28,18 26,26 Q26,30 28,34 Q28,38 24,38 L16,38 Q12,38 12,34 Q14,30 14,26 Q12,18 20,11 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <line x1="20" y1="14" x2="20" y2="26" stroke="${c.stroke}" stroke-width="1" opacity="0.4"/>`;
-      break;
-    case 'N':
-      d=`<path d="M14,36 L14,28 Q12,22 14,16 Q16,12 18,10 L16,8 Q18,5 22,5 Q26,5 28,8 L26,10 Q28,14 28,20 L30,22 L28,24 Q30,28 28,32 Q28,38 24,38 L16,38 Q12,38 12,36 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <circle cx="19" cy="10" r="1.2" fill="${c.stroke}"/>`;
-      break;
-    case 'P':
-      d=`<circle cx="20" cy="12" r="5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>
-         <path d="M15,18 Q13,22 13,28 L13,34 Q13,38 17,38 L23,38 Q27,38 27,34 L27,28 Q27,22 25,18 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;
-      break;
-  }
-  return `<svg viewBox="0 0 40 40" style="width:90%;height:90%;" xmlns="http://www.w3.org/2000/svg">${d}</svg>`;
-}
 
-function promoSVG(type, color){
-  const colors = {'w':{fill:'#ffffff',stroke:'#1a1a1a'},'b':{fill:'#1a1a1a',stroke:'#ffffff'}};
-  const c = colors[color] || colors['w'];
-  const sw = 1.5;
-  let d = '';
-  switch(type){
-    case 'K':case 'k':d=`<line x1="20" y1="6" x2="20" y2="12" stroke="${c.stroke}" stroke-width="${sw}" stroke-linecap="round"/><line x1="17" y1="9" x2="23" y2="9" stroke="${c.stroke}" stroke-width="${sw}" stroke-linecap="round"/><path d="M12,38 Q12,28 14,24 Q10,22 10,18 Q10,14 14,13 Q16,12 16,10 Q16,7 20,7 Q24,7 24,10 Q24,12 26,13 Q30,14 30,18 Q30,22 26,24 Q28,28 28,38 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;break;
-    case 'Q':case 'q':d=`<circle cx="10" cy="8" r="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/><circle cx="30" cy="8" r="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/><circle cx="20" cy="5" r="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/><path d="M10,10 L12,20 Q8,24 10,30 L10,36 Q10,38 12,38 L28,38 Q30,38 30,36 L30,30 Q32,24 28,20 L30,10 Q28,18 20,15 Q12,18 10,10 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;break;
-    case 'R':case 'r':d=`<path d="M10,10 L10,8 L13,8 L13,11 L17,11 L17,8 L20,8 L23,8 L23,11 L27,11 L27,8 L30,8 L30,10 L30,14 L28,16 L28,34 Q28,38 24,38 L16,38 Q12,38 12,34 L12,16 L10,14 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;break;
-    case 'B':case 'b':d=`<ellipse cx="20" cy="8" rx="2" ry="2.5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/><path d="M20,11 Q28,18 26,26 Q26,30 28,34 Q28,38 24,38 L16,38 Q12,38 12,34 Q14,30 14,26 Q12,18 20,11 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;break;
-    case 'N':case 'n':d=`<path d="M14,36 L14,28 Q12,22 14,16 Q16,12 18,10 L16,8 Q18,5 22,5 Q26,5 28,8 L26,10 Q28,14 28,20 L30,22 L28,24 Q30,28 28,32 Q28,38 24,38 L16,38 Q12,38 12,36 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;break;
-    case 'P':case 'p':d=`<circle cx="20" cy="12" r="5" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/><path d="M15,18 Q13,22 13,28 L13,34 Q13,38 17,38 L23,38 Q27,38 27,34 L27,28 Q27,22 25,18 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;break;
-  }
-  return `<svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg" width="36" height="36">${d}</svg>`;
-}
+
+
 
 // ========== CONSTANTS ==========
-const PIECES=['K','Q','R','B','N','P'];
+const UNI={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙',k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
 const VAL={p:100,n:320,b:330,r:500,q:900,k:20000};
 const PST={
 p:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0],
@@ -726,8 +673,7 @@ function render(){
     const piece=s.bd[ri];
     if(piece){
       const sp=document.createElement('span');
-      sp.style.cssText='position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;z-index:2;pointer-events:none;';
-      sp.innerHTML=pieceSVG(piece.toLowerCase(),pc(piece));
+      sp.className='pc';sp.textContent=UNI[piece];
       sq.appendChild(sp);
     }
     sq.addEventListener('click',e=>{e.preventDefault();initAudio();onClick(ri);});
@@ -735,8 +681,8 @@ function render(){
     bEl.appendChild(sq);
   }
 
-  document.getElementById('cap-w').innerHTML='⬜ '+s.capW.map(p=>{const c=pc(p);return`<span class="pc" style="display:inline-block;width:16px;height:16px;vertical-align:middle">${pieceSVG(p.toLowerCase(),c)}</span>`;}).join('');
-  document.getElementById('cap-b').innerHTML='⬛ '+s.capB.map(p=>{const c=pc(p);return`<span class="pc" style="display:inline-block;width:16px;height:16px;vertical-align:middle">${pieceSVG(p.toLowerCase(),c)}</span>`;}).join('');
+  document.getElementById('cap-w').innerHTML='⬜ '+s.capW.map(p=>UNI[p]).join('');
+  document.getElementById('cap-b').innerHTML='⬛ '+s.capB.map(p=>UNI[p]).join('');
 
   const ml=document.getElementById('mlist');ml.innerHTML='';
   for(let i=0;i<s.hist.length;i+=2){
@@ -778,7 +724,7 @@ function showPromo(f,t){
   const modal=document.getElementById('promo'),ch=document.getElementById('pchoices');ch.innerHTML='';
   const pieces=G.pColor==='w'?['Q','R','B','N']:['q','r','b','n'];
   pieces.forEach(p=>{
-    const b=document.createElement('button');b.className='pbtn';b.innerHTML=promoSVG(p.toLowerCase(),G.pColor);
+    const b=document.createElement('button');b.className='pbtn';b.textContent=UNI[p];b.style.fontSize="2rem";
     b.addEventListener('click',()=>{modal.classList.remove('on');const mv=G.lmoves.find(m=>m.f===f&&m.t===t&&m.pr===p);if(mv)execMv(mv);});
     ch.appendChild(b);
   });
