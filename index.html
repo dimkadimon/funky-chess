@@ -112,8 +112,8 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 
 /* Piece styling */
 .pc{line-height:1;z-index:2;pointer-events:none;}
-.pw{color:#fff;-webkit-text-stroke:1.5px #000;text-shadow:0 0 3px #000,0 0 6px #000,0 0 10px rgba(0,0,0,0.4);}
-.pb{color:#111;-webkit-text-stroke:1px #666;text-shadow:0 0 2px rgba(0,0,0,0.3);}
+.pw{color:#fff;-webkit-text-fill-color:#fff;-webkit-text-stroke:1px #222;}
+.pb{color:#111;-webkit-text-fill-color:#111;-webkit-text-stroke:0.5px #555;}
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
 
@@ -435,7 +435,8 @@ function applyBd(bd,mv,s){
   if(mv.cs){const[r]=i2rc(mv.f);if(mv.cs==='K'){nb[rc2i(r,5)]=nb[rc2i(r,7)];nb[rc2i(r,7)]=0;}else{nb[rc2i(r,3)]=nb[rc2i(r,0)];nb[rc2i(r,0)]=0;}}
   if(mv.pr)nb[mv.t]=mv.pr;
   if(s.variant==='swapsies'&&bd[mv.t]&&pc(bd[mv.t])!==pc(p)){
-    nb[mv.t]=pc(p)==='w'?bd[mv.t].toUpperCase():bd[mv.t].toLowerCase();
+    const capType=bd[mv.t].toLowerCase();
+    nb[mv.t]=pc(p)==='w'?capType.toUpperCase():capType;
   }
   if(s.variant==='teleports'&&s.tps.length===2){
     const[a,b]=s.tps;
