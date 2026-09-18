@@ -170,6 +170,13 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
       <button class="btn" data-v="torus">🍩 Torus</button>
     </div>
   </div>
+  <div class="section"><label>🤖 AI Difficulty</label>
+    <div class="btn-row" id="g-diff">
+      <button class="btn sel" data-v="easy">Easy</button>
+      <button class="btn" data-v="medium">Medium</button>
+      <button class="btn" data-v="hard">Hard</button>
+    </div>
+  </div>
   <div class="section"><label>♔ Play As</label>
     <div class="btn-row" id="g-color">
       <button class="btn sel" data-v="w">⬜ White</button>
@@ -184,7 +191,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.0.0</div>
+  <div class="version">v1.1.0</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
@@ -557,7 +564,7 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s){
 }
 
 function getAIMove(){
-  const s=G;const depth=3;
+  const s=G;const depth=s.diff==='hard'?5:s.diff==='medium'?4:2;
   const legal=genLegal(s);if(!legal.length)return null;if(legal.length===1)return legal[0];
   const r=ab(s.bd,s.turn,s.cas,s.ep,depth,-Infinity,Infinity,1,s.aiColor,s);
   return r.mv||legal[0];
@@ -727,6 +734,7 @@ document.querySelectorAll('.btn-row').forEach(g=>g.querySelectorAll('.btn').forE
 document.getElementById('btnGo').addEventListener('click',()=>{
   initAudio();
   G.variant=document.querySelector('#g-variant .btn.sel')?.dataset.v||'teleports';
+  G.diff=document.querySelector('#g-diff .btn.sel')?.dataset.v||'easy';
   G.pColor=document.querySelector('#g-color .btn.sel')?.dataset.v||'w';
   G.aiColor=G.pColor==='w'?'b':'w';
   startGame();
@@ -743,8 +751,9 @@ function startGame(){
   document.getElementById('ov-end').classList.remove('on');
   document.getElementById('promo').classList.remove('on');
   document.getElementById('mpanel').classList.remove('on');
-  if(s.pColor==='w'){document.getElementById('lb-b').textContent='AI';const l=document.getElementById('lb-w');if(l)l.textContent='You';}
-  else{document.getElementById('lb-b').textContent='You';const l=document.getElementById('lb-w');if(l)l.textContent='AI';}
+  const lbl=s.diff.charAt(0).toUpperCase()+s.diff.slice(1);
+  if(s.pColor==='w'){document.getElementById('lb-b').textContent='AI ('+lbl+')';const l=document.getElementById('lb-w');if(l)l.textContent='You';}
+  else{document.getElementById('lb-b').textContent='You';const l=document.getElementById('lb-w');if(l)l.textContent='AI ('+lbl+')';}
   const badges={teleports:'🌀 Teleports',swapsies:'🔄 Swapsies',walls:'🧱 Walls',torus:'🍩 Torus'};
   document.getElementById('vbadge').textContent=badges[s.variant]||'';
   render();if(s.pColor==='b')setTimeout(runAI,300);
