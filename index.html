@@ -116,6 +116,13 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
 
+.end-bar{display:none;align-items:center;justify-content:center;gap:10px;padding:6px 8px;background:rgba(0,0,0,0.85);border-radius:var(--r);margin-top:2px;flex-wrap:wrap;}
+.end-bar.on{display:flex;}
+.end-bar h2{font-family:'Fredoka',sans-serif;font-size:1rem;color:var(--gold);margin:0;}
+.end-bar #end-m{font-size:0.75rem;color:var(--accent3);margin:0;}
+.end-btns{display:flex;gap:6px;}
+.end-btns .btn{padding:5px 12px;font-size:0.7rem;}
+
 /* Overlays */
 .ov{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.88);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;border-radius:0 0 var(--r) var(--r);padding:10px 8px;flex-wrap:wrap;}
 .ov.on{opacity:1;pointer-events:auto;}
@@ -206,17 +213,19 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
   <div class="cap-row" id="cap-b"></div>
   <div id="board-wrap">
     <div id="board"></div>
-    <div class="ov" id="ov-end">
-      <h2 id="end-t" style="color:var(--gold)">Game Over</h2>
-      <p id="end-m"></p>
-      <button class="btn sel" id="bRematch">⚔️ Rematch</button>
-      <button class="btn" id="bMenu">🏠 Menu</button>
-    </div>
     <div id="promo"><h3>Promote Pawn</h3><div class="pchoices" id="pchoices"></div></div>
     <div id="mpanel"><h3 style="display:flex;justify-content:space-between;align-items:center;">📜 Moves <button class="cbtn" id="bCopy" title="Copy moves" style="width:24px;height:24px;font-size:0.7rem;">📋</button></h3><div id="mlist"></div></div>
   </div>
   <div class="cap-row" id="cap-w"></div>
   <div class="status" id="status">Your turn</div>
+  <div class="end-bar" id="ov-end">
+    <h2 id="end-t">Game Over</h2>
+    <span id="end-m"></span>
+    <span class="end-btns">
+      <button class="btn sel" id="bRematch">⚔️ Rematch</button>
+      <button class="btn" id="bMenu">🏠 Menu</button>
+    </span>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -719,7 +728,7 @@ function showEnd(){
   }else{
     t.textContent='🤝 Draw';m.textContent='The game ended in a draw.';
   }
-  setTimeout(()=>ov.classList.add('on'),800);
+  ov.classList.add('on');
 }
 
 
