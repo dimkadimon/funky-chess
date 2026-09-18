@@ -7,17 +7,16 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-:root{--r:12px;}
+:root{--r:12px;--sq-l:#f0e4cc;--sq-d:#b58863;}
 
 [data-theme="dark"]{
   --bg:#0f0a1e;--bg2:#1a1035;--card:rgba(255,255,255,0.04);
   --accent:#ff6b9d;--accent2:#c44dff;--accent3:#4dc9ff;
   --gold:#ffd700;--text:#ede4ff;--muted:rgba(237,228,255,0.55);
-  --sq-l:#f0e4cc;--sq-d:#b58863;
   --sq-sel:rgba(100,220,255,0.55);--sq-move:rgba(100,220,255,0.45);--sq-cap:rgba(255,60,60,0.5);
-  --sq-last:rgba(255,215,0,0.3);
+  --sq-last:rgba(255,255,0,0.45);
   --sq-wall-bg:#5c3d28;--sq-wall-fg:#3a2515;
-  --sq-tp-glow:rgba(180,70,255,0.7);--sq-tp-bg:rgba(180,70,255,0.15);
+  --sq-tp-glow:rgba(180,70,255,0.7);--sq-tp-bg:#8060c0;
   --sq-torus:rgba(77,255,180,0.2);
   --panel-bg:rgba(8,4,18,0.94);--panel-border:rgba(255,255,255,0.1);
   --btn-bg:rgba(255,255,255,0.07);--btn-border:rgba(255,255,255,0.12);
@@ -30,11 +29,10 @@
   --bg:#b8a88c;--bg2:#a89878;--card:rgba(255,255,255,0.08);
   --accent:#c94070;--accent2:#8020c0;--accent3:#1070b0;
   --gold:#a08000;--text:#1a1028;--muted:rgba(26,16,40,0.5);
-  --sq-l:#f5edd8;--sq-d:#b8884e;
   --sq-sel:rgba(16,112,176,0.45);--sq-move:rgba(16,112,176,0.35);--sq-cap:rgba(200,40,40,0.45);
-  --sq-last:rgba(160,128,0,0.22);
+  --sq-last:rgba(255,255,0,0.45);
   --sq-wall-bg:#7a5a3a;--sq-wall-fg:#4a3520;
-  --sq-tp-glow:rgba(128,32,192,0.65);--sq-tp-bg:rgba(128,32,192,0.12);
+  --sq-tp-glow:rgba(128,32,192,0.65);--sq-tp-bg:#8060c0;
   --sq-torus:rgba(30,180,100,0.2);
   --panel-bg:rgba(232,220,200,0.96);--panel-border:rgba(0,0,0,0.1);
   --btn-bg:rgba(0,0,0,0.05);--btn-border:rgba(0,0,0,0.12);
@@ -104,11 +102,8 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 
 /* Wall squares */
 .sq.wl{cursor:default;}
-.sq.wl::after{content:'';position:absolute;inset:0;opacity:0.35;
-  background:repeating-linear-gradient(0deg,transparent,transparent 22%,var(--sq-wall-fg) 22%,var(--sq-wall-fg) 26%,transparent 26%),
-             repeating-linear-gradient(90deg,transparent,transparent 22%,var(--sq-wall-fg) 22%,var(--sq-wall-fg) 26%,transparent 26%);
-  pointer-events:none;}
-.sq.wl .wall-icon{position:absolute;font-size:1.4em;opacity:0.7;z-index:1;pointer-events:none;}
+.sq.wl{background:#3a2515!important;}
+
 
 /* Piece styling */
 .pc{line-height:1;z-index:2;pointer-events:none;}
@@ -200,8 +195,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
     <span class="badge" id="vbadge">🌀</span>
     <div class="ctrls">
       <button class="cbtn" id="bUndo" title="Undo (Ctrl+Z)">↩</button>
-      <button class="cbtn" id="bMoves" title="Moves">☰</button>
-      <button class="cbtn" id="bMenu2" title="Menu">✕</button>
+            <button class="cbtn" id="bMenu2" title="Menu">✕</button>
     </div>
   </div>
   <div class="cap-row" id="cap-b"></div>
@@ -512,7 +506,9 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s){
   legal.sort((a,b)=>{
     const va=bd[a.t]?(VAL[bd[a.t].toLowerCase()]||0):0;
     const vb=bd[b.t]?(VAL[bd[b.t].toLowerCase()]||0):0;
-    return vb-va;
+    const sa=bd[a.t]&&va>(VAL[bd[a.f].toLowerCase()]||0)?va+500:0;
+    const sb=bd[b.t]&&vb>(VAL[bd[b.f].toLowerCase()]||0)?vb+500:0;
+    return (vb+sb)-(va+sa);
   });
   let bestM=legal[0];
   if(max){
@@ -539,7 +535,7 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s){
 }
 
 function getAIMove(){
-  const s=G;const depth=s.diff==='hard'?3:s.diff==='medium'?2:1;
+  const s=G;const depth=s.diff==='hard'?4:s.diff==='medium'?3:1;
   const legal=genLegal(s);if(!legal.length)return null;if(legal.length===1)return legal[0];
   const r=ab(s.bd,s.turn,s.cas,s.ep,depth,-Infinity,Infinity,1,s.aiColor,s);
   return r.mv||legal[0];
@@ -562,7 +558,7 @@ function render(){
     if(r===7){const fl=document.createElement('span');fl.className='coord file';fl.textContent='abcdefgh'[c];fl.style.color=lt?'var(--sq-d)':'var(--sq-l)';sq.appendChild(fl);}
 
     if(s.tps.includes(ri))sq.classList.add('tp');
-    if(s.walls.includes(ri)){sq.classList.add('wl');sq.innerHTML+='<span class="wall-icon">🧱</span>';}
+    if(s.walls.includes(ri)){sq.classList.add('wl');}
     if(s.lastM&&(s.lastM.f===ri||s.lastM.t===ri))sq.classList.add('last');
     if(s.sel===ri)sq.classList.add('sel');
     if(s.bd[ri]&&s.bd[ri].toLowerCase()==='k'&&pc(s.bd[ri])===s.turn&&s.check)sq.classList.add('chk');
@@ -664,6 +660,7 @@ function runAI(){
 }
 
 function showEnd(){
+  render();
   const s=G;const ov=document.getElementById('ov-end');const t=document.getElementById('end-t'),m=document.getElementById('end-m');
   const tmp={bd:s.bd,turn:s.turn,cas:s.cas,ep:s.ep,hm:0,fm:0,variant:s.variant,tps:s.tps,walls:s.walls,check:false};
   const legal=genLegal(tmp);const inC=isAttacked(s.bd,findK(s.bd,s.turn),s.turn==='w'?'b':'w',s);
@@ -672,7 +669,7 @@ function showEnd(){
     if(w===s.pColor){t.textContent='🎉 You Win!';m.textContent='Checkmate! Congratulations!';sndWin();}
     else{t.textContent='😞 You Lose';m.textContent='Checkmate! Better luck next time.';sndLose();}
   }else{t.textContent='🤝 Draw';m.textContent='The game ended in a draw.';}
-  ov.classList.add('on');
+  setTimeout(()=>ov.classList.add('on'),1500);
 }
 
 // ========== MENU ==========
@@ -723,7 +720,6 @@ document.getElementById('confirmNo').addEventListener('click',()=>document.getEl
 document.getElementById('bMenu').addEventListener('click',doLeave);
 document.getElementById('bMenu2').addEventListener('click',goToMenu);
 document.getElementById('bUndo').addEventListener('click',()=>{if(G.over||G.thinking)return;if(G.stack.length>=2&&G.turn===G.pColor){undoMv(G);undoMv(G);render();toast('↩ Undo');}});
-document.getElementById('bMoves').addEventListener('click',()=>document.getElementById('mpanel').classList.toggle('on'));
 document.getElementById('bCopy').addEventListener('click',()=>{
   const moves=G.hist.map((h,i)=>{const num=Math.floor(i/2)+1;return i%2===0?num+'. '+h.n:h.n;}).join(' ');
   navigator.clipboard.writeText(moves).then(()=>toast('📋 Moves copied!')).catch(()=>toast('Copy failed'));
