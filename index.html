@@ -117,11 +117,11 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
 
 /* Overlays */
-.ov{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--panel-bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .3s;border-radius:var(--r);}
+.ov{position:absolute;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.88);display:flex;flex-direction:row;align-items:center;justify-content:center;gap:10px;z-index:50;opacity:0;pointer-events:none;transition:opacity .3s;border-radius:0 0 var(--r) var(--r);padding:10px 8px;flex-wrap:wrap;}
 .ov.on{opacity:1;pointer-events:auto;}
-.ov h2{font-family:'Fredoka',sans-serif;font-size:1.6rem;margin-bottom:.3rem;}
-.ov p{font-size:0.85rem;margin-bottom:1rem;color:var(--accent3);}
-.ov .btn{margin:3px;}
+.ov h2{font-family:'Fredoka',sans-serif;font-size:1.1rem;margin:0;color:var(--gold);}
+.ov p{font-size:0.75rem;margin:0;color:var(--accent3);}
+.ov .btn{margin:0;padding:6px 14px;font-size:0.72rem;}
 
 #promo{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--panel-bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:60;border-radius:var(--r);}
 #promo.on{display:flex;}
@@ -168,13 +168,6 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
       <button class="btn" data-v="swapsies">🔄 Swapsies</button>
       <button class="btn" data-v="walls">🧱 Walls</button>
       <button class="btn" data-v="torus">🍩 Torus</button>
-    </div>
-  </div>
-  <div class="section"><label>🤖 AI Difficulty</label>
-    <div class="btn-row" id="g-diff">
-      <button class="btn sel" data-v="easy">Easy</button>
-      <button class="btn" data-v="medium">Medium</button>
-      <button class="btn" data-v="hard">Hard</button>
     </div>
   </div>
   <div class="section"><label>♔ Play As</label>
@@ -564,7 +557,7 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s){
 }
 
 function getAIMove(){
-  const s=G;const depth=s.diff==='hard'?5:s.diff==='medium'?4:2;
+  const s=G;const depth=3;
   const legal=genLegal(s);if(!legal.length)return null;if(legal.length===1)return legal[0];
   const r=ab(s.bd,s.turn,s.cas,s.ep,depth,-Infinity,Infinity,1,s.aiColor,s);
   return r.mv||legal[0];
@@ -719,7 +712,7 @@ function showEnd(){
   }else{
     t.textContent='🤝 Draw';m.textContent='The game ended in a draw.';
   }
-  setTimeout(()=>ov.classList.add('on'),1500);
+  setTimeout(()=>ov.classList.add('on'),800);
 }
 
 
@@ -734,7 +727,6 @@ document.querySelectorAll('.btn-row').forEach(g=>g.querySelectorAll('.btn').forE
 document.getElementById('btnGo').addEventListener('click',()=>{
   initAudio();
   G.variant=document.querySelector('#g-variant .btn.sel')?.dataset.v||'teleports';
-  G.diff=document.querySelector('#g-diff .btn.sel')?.dataset.v||'easy';
   G.pColor=document.querySelector('#g-color .btn.sel')?.dataset.v||'w';
   G.aiColor=G.pColor==='w'?'b':'w';
   startGame();
@@ -751,9 +743,8 @@ function startGame(){
   document.getElementById('ov-end').classList.remove('on');
   document.getElementById('promo').classList.remove('on');
   document.getElementById('mpanel').classList.remove('on');
-  const lbl=s.diff.charAt(0).toUpperCase()+s.diff.slice(1);
-  if(s.pColor==='w'){document.getElementById('lb-b').textContent=`AI (${lbl})`;const l=document.getElementById('lb-w');if(l)l.textContent='You';}
-  else{document.getElementById('lb-b').textContent='You';const l=document.getElementById('lb-w');if(l)l.textContent=`AI (${lbl})`;}
+  if(s.pColor==='w'){document.getElementById('lb-b').textContent='AI';const l=document.getElementById('lb-w');if(l)l.textContent='You';}
+  else{document.getElementById('lb-b').textContent='You';const l=document.getElementById('lb-w');if(l)l.textContent='AI';}
   const badges={teleports:'🌀 Teleports',swapsies:'🔄 Swapsies',walls:'🧱 Walls',torus:'🍩 Torus'};
   document.getElementById('vbadge').textContent=badges[s.variant]||'';
   render();if(s.pColor==='b')setTimeout(runAI,300);
