@@ -152,7 +152,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
   .btn{padding:8px 12px;font-size:0.72rem;min-height:40px;}
   .btn-go{padding:12px 28px;font-size:1rem;min-height:48px;}
   .pinfo{padding:3px 7px;font-size:0.63rem;}
-  .cbtn{width:30px;height:30px;font-size:0.75rem;}
+  .cbtn{width:38px;height:38px;font-size:1rem;}
 }
 </style>
 </head>
@@ -237,8 +237,8 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 // ========== AUDIO ==========
 const AC=window.AudioContext||window.webkitAudioContext;
 let ac=null;
-function initAudio(){if(!ac)try{ac=new AC();}catch(e){}}
-function tone(f,d,t='sine',v=0.1){if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
+function initAudio(){if(!ac)try{ac=new AC();}catch(e){}if(ac&&ac.state==='suspended')try{ac.resume();}catch(e){}}
+function tone(f,d,t='sine',v=0.1){initAudio();if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
 const sndMove=()=>tone(520,0.06);
 const sndCap=()=>{tone(120,0.15,'sawtooth',0.12);setTimeout(()=>tone(250,0.1,'square',0.07),40);};
 const sndCheck=()=>{tone(600,0.08,'triangle',0.12);setTimeout(()=>tone(900,0.15,'triangle',0.12),80);};
@@ -724,7 +724,12 @@ function showEnd(){
 
 
 // ========== MENU ==========
-document.querySelectorAll('.btn-row').forEach(g=>g.querySelectorAll('.btn').forEach(b=>b.addEventListener('click',()=>{g.querySelectorAll('.btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');})));
+function selectBtn(g,b){g.querySelectorAll('.btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');}
+document.querySelectorAll('.btn-row').forEach(g=>g.querySelectorAll('.btn').forEach(b=>{
+  const handler=e=>{e.preventDefault();selectBtn(g,b);};
+  b.addEventListener('click',handler);
+  b.addEventListener('touchstart',handler,{passive:false});
+}));
 
 document.getElementById('btnGo').addEventListener('click',()=>{
   initAudio();
