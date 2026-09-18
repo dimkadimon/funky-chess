@@ -94,6 +94,10 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .sq .coord.file{bottom:1px;right:2px;}
 .sq .coord.rank{top:1px;left:2px;}
 
+/* Torus wrap indicators */
+.sq .wrap-left{position:absolute;left:1px;top:50%;transform:translateY(-50%);font-size:0.65rem;opacity:0.55;pointer-events:none;z-index:4;color:var(--accent);}
+.sq .wrap-right{position:absolute;right:1px;top:50%;transform:translateY(-50%);font-size:0.65rem;opacity:0.55;pointer-events:none;z-index:4;color:var(--accent);}
+
 /* Teleport squares */
 .sq.tp{background:var(--sq-tp-bg) !important;animation:tp-pulse 1.5s ease-in-out infinite;}
 .sq.tp::before{content:'';position:absolute;inset:4px;border-radius:50%;border:3px solid var(--sq-tp-glow);animation:tp-ring 1.5s ease-in-out infinite;pointer-events:none;}
@@ -101,13 +105,12 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 @keyframes tp-ring{0%,100%{transform:scale(0.7);opacity:1}50%{transform:scale(1);opacity:0.4}}
 
 /* Wall squares */
-.sq.wl{cursor:default;}
-.sq.wl{background:#3a2515!important;}
+.sq.wl{cursor:default;background:repeating-linear-gradient(45deg,var(--sq-wall-bg) 0,var(--sq-wall-bg) 7px,var(--sq-wall-fg) 7px,var(--sq-wall-fg) 14px)!important;}
 
 
 /* Piece styling */
-.pc{line-height:1;z-index:2;pointer-events:none;}
-.pw{color:#fff;-webkit-text-fill-color:#fff;-webkit-text-stroke:1px #222;}
+.pc{line-height:1;z-index:2;pointer-events:none;font-variant-emoji:text;}
+.pw{color:#fff;-webkit-text-fill-color:#fff;-webkit-text-stroke:2px #111;paint-order:stroke fill;text-shadow:0 0 4px rgba(0,0,0,0.7);}
 .pb{color:#111;-webkit-text-fill-color:#111;-webkit-text-stroke:0.5px #555;}
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
@@ -428,7 +431,7 @@ function applyBd(bd,mv,s){
   nb[mv.t]=p;nb[mv.f]=0;
   if(mv.cs){const[r]=i2rc(mv.f);if(mv.cs==='K'){nb[rc2i(r,5)]=nb[rc2i(r,7)];nb[rc2i(r,7)]=0;}else{nb[rc2i(r,3)]=nb[rc2i(r,0)];nb[rc2i(r,0)]=0;}}
   if(mv.pr)nb[mv.t]=mv.pr;
-  if(s.variant==='swapsies'&&bd[mv.t]&&pc(bd[mv.t])!==pc(p)){
+  if(s.variant==='swapsies'&&bd[mv.t]&&pc(bd[mv.t])!==pc(p)&&p.toLowerCase()!=='k'&&!mv.pr){
     const capType=bd[mv.t].toLowerCase();
     nb[mv.t]=pc(p)==='w'?capType.toUpperCase():capType;
   }
@@ -563,6 +566,13 @@ function render(){
     if(s.sel===ri)sq.classList.add('sel');
     if(s.bd[ri]&&s.bd[ri].toLowerCase()==='k'&&pc(s.bd[ri])===s.turn&&s.check)sq.classList.add('chk');
 
+    // Torus wrap-around arrows
+    if(s.variant==='torus'){
+      const dc=i%8;
+      if(dc===0){const a=document.createElement('span');a.className='wrap-left';a.textContent='◀';sq.appendChild(a);}
+      if(dc===7){const a=document.createElement('span');a.className='wrap-right';a.textContent='▶';sq.appendChild(a);}
+    }
+
     if(s.sel>=0&&!s.walls.includes(ri)){
       const hit=s.lmoves.find(m=>m.f===s.sel&&m.t===ri);
       if(hit){if(s.bd[ri])sq.innerHTML+='<div class="ring"></div>';else sq.innerHTML+='<div class="dot"></div>';}
@@ -629,12 +639,12 @@ function showPromo(f,t){
 }
 
 function execMv(mv){
-  const s=G,cap=s.bd[mv.t],f=mv.f,t=mv.t,hadCap=cap||mv.ep;
+  const s=G,cap=s.bd[mv.t],f=mv.f,t=mv.t,hadCap=cap||mv.ep,mvPc=s.bd[mv.f];
   makeMv(s,mv);
   if(hadCap){sndCap();}else sndMove();
   
   if(s.variant==='teleports'&&s.tps.includes(t)){const other=s.tps[0]===t?s.tps[1]:s.tps[0];setTimeout(()=>{sndTP();},150);toast('🌀 Teleported!');}
-  if(s.variant==='swapsies'&&hadCap)toast('🔄 Swapped!');
+  if(s.variant==='swapsies'&&hadCap&&mvPc.toLowerCase()!=='k'&&!mv.pr)toast('🔄 Swapped!');
   if(s.check)sndCheck();
   s.sel=-1;s.lmoves=[];render();
   if(s.over){showEnd();return;}
@@ -647,12 +657,12 @@ function runAI(){
   setTimeout(()=>{
     const mv=getAIMove();
     if(mv){
-      const cap=s.bd[mv.t],f=mv.f,t=mv.t,hadCap=cap||mv.ep;
+      const cap=s.bd[mv.t],f=mv.f,t=mv.t,hadCap=cap||mv.ep,mvPc=s.bd[mv.f];
       makeMv(s,mv);
       if(hadCap){sndCap();}else sndMove();
       
       if(s.variant==='teleports'&&s.tps.includes(t)){const other=s.tps[0]===t?s.tps[1]:s.tps[0];setTimeout(()=>{sndTP();},150);toast('🌀 AI teleported!');}
-      if(s.variant==='swapsies'&&hadCap)toast('🔄 AI swapped!');
+      if(s.variant==='swapsies'&&hadCap&&mvPc.toLowerCase()!=='k'&&!mv.pr)toast('🔄 AI swapped!');
       if(s.check)sndCheck();
     }
     s.thinking=false;render();if(s.over)showEnd();
@@ -719,7 +729,7 @@ document.getElementById('confirmNo').addEventListener('click',()=>document.getEl
 
 document.getElementById('bMenu').addEventListener('click',doLeave);
 document.getElementById('bMenu2').addEventListener('click',goToMenu);
-document.getElementById('bUndo').addEventListener('click',()=>{if(G.over||G.thinking)return;if(G.stack.length>=2&&G.turn===G.pColor){undoMv(G);undoMv(G);render();toast('↩ Undo');}});
+document.getElementById('bUndo').addEventListener('click',()=>{if(G.over||G.thinking)return;if(G.stack.length>=2&&G.turn===G.pColor){undoMv(G);undoMv(G);G.sel=-1;G.lmoves=[];render();toast('↩ Undo');}});
 document.getElementById('bCopy').addEventListener('click',()=>{
   const moves=G.hist.map((h,i)=>{const num=Math.floor(i/2)+1;return i%2===0?num+'. '+h.n:h.n;}).join(' ');
   navigator.clipboard.writeText(moves).then(()=>toast('📋 Moves copied!')).catch(()=>toast('Copy failed'));
