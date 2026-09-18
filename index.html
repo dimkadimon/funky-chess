@@ -83,7 +83,7 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 #board-wrap{position:relative;touch-action:none;}
 #board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(90vw,90vh - 120px,540px);height:min(90vw,90vh - 120px,540px);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);position:relative;user-select:none;-webkit-user-select:none;}
 
-.sq{display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .1s;}
+.sq{position:relative;cursor:pointer;transition:background .1s;overflow:hidden;}
 .sq.l{background:var(--sq-l);}
 .sq.d{background:var(--sq-d);}
 .sq.sel{box-shadow:inset 0 0 0 3px var(--sq-sel);}
@@ -110,9 +110,7 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
   pointer-events:none;}
 .sq.wl .wall-icon{position:absolute;font-size:1.4em;opacity:0.7;z-index:1;pointer-events:none;}
 
-/* Piece styling */
-.pc{width:100%;height:100%;z-index:2;}
-.pc svg{width:100%;height:100%;}
+/* Piece styling — span gets inline styles, SVG below */
 
 .status{text-align:center;padding:2px;font-weight:700;font-size:0.78rem;color:var(--gold);min-height:20px;}
 
@@ -287,7 +285,7 @@ function pieceSVG(type, color){
          <path d="M15,18 Q13,22 13,28 L13,34 Q13,38 17,38 L23,38 Q27,38 27,34 L27,28 Q27,22 25,18 Z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="${sw}"/>`;
       break;
   }
-  return `<svg viewBox="0 0 40 40" style="width:90%;height:90%;display:block;margin:auto;" xmlns="http://www.w3.org/2000/svg">${d}</svg>`;
+  return `<svg viewBox="0 0 40 40" style="width:90%;height:90%;" xmlns="http://www.w3.org/2000/svg">${d}</svg>`;
 }
 
 function promoSVG(type, color){
