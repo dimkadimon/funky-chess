@@ -44,7 +44,7 @@
 }
 
 html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
-canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
+
 
 .screen{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .3s,transform .3s;}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
@@ -158,7 +158,6 @@ canvas#fx{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none
 </style>
 </head>
 <body data-theme="dark">
-<canvas id="fx"></canvas>
 <button class="theme-btn" id="themeBtn" title="Toggle theme">🌙</button>
 
 <div id="title-screen" class="screen">
@@ -493,49 +492,15 @@ function makeMv(s,mv){
 function isInsuff(bd){const p={w:[],b:[]};for(let i=0;i<64;i++)if(bd[i]){const c=pc(bd[i]);p[c].push(bd[i].toLowerCase());}if(p.w.length===1&&p.b.length===1)return 1;if(p.w.length===1&&p.b.length===2&&(p.b.includes('b')||p.b.includes('n')))return 1;if(p.b.length===1&&p.w.length===2&&(p.w.includes('b')||p.w.includes('n')))return 1;return 0;}
 function undoMv(s){if(!s.stack.length)return;Object.assign(s,s.stack.pop());s.hist.pop();}
 
-// ========== AI — iterative deepening with time limit ==========
-const AI_DEPTH={easy:2,medium:3,hard:4};
-const AI_TIME={easy:400,medium:1200,hard:2500};
-
+// ========== AI ==========
 function evalBd(bd,col){
   let sc=0;
   for(let i=0;i<64;i++){const p=bd[i];if(!p)continue;const c=pc(p),t=p.toLowerCase();let v=(VAL[t]||0)+(PST[t]?PST[t][c==='w'?i:flipI(i)]||0:0);sc+=(c===col?v:-v);}
   return sc;
 }
 
-function qsearch(bd,col,alpha,beta,s){
-  const stand=evalBd(bd,col);
-  if(stand>=beta)return beta;if(stand>alpha)alpha=stand;
-  const en=col==='w'?'b':'w';
-  for(let i=0;i<64;i++){
-    const p=bd[i];if(!p||pc(p)!==col)continue;
-    const[r,c]=i2rc(i),t=p.toLowerCase();
-    const caps=[];
-    if(t==='p'){
-      const dir=col==='w'?-1:1;
-      for(const dc of[-1,1]){let tc=c+dc;const fr=r+dir;if(s.variant==='torus')tc=((tc%8)+8)%8;if(!onB(fr,tc))continue;const ti=rc2i(fr,tc);if(isW(ti))continue;const tgt=bd[ti];if(tgt&&pc(tgt)===en)caps.push(ti);}
-    }else if(t==='n'){
-      for(const[dr,dc]of[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]){let nr=r+dr,nc=c+dc;if(s.variant==='torus'){nc=((nc%8)+8)%8;if(nr<0||nr>=8)continue;}else if(!onB(nr,nc))continue;const ti=rc2i(nr,nc);const tgt=bd[ti];if(tgt&&pc(tgt)===en)caps.push(ti);}
-    }else{
-      const dirs=[];
-      if(t==='b'||t==='q')dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
-      if(t==='r'||t==='q')dirs.push([-1,0],[1,0],[0,-1],[0,1]);
-      if(t==='k')for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;dirs.push([dr,dc]);}
-      for(const[dr,dc]of dirs){let nr=r+dr,nc=c+dc;for(let step=0;step<8;step++){let cr=nr,cc=nc;if(s.variant==='torus'){cc=((cc%8)+8)%8;if(cr<0||cr>=8)break;}else if(!onB(cr,cc))break;if(isW(rc2i(cr,cc)))break;const tgt=bd[rc2i(cr,cc)];if(tgt){if(pc(tgt)===en)caps.push(rc2i(cr,cc));break;}if(t==='k')break;nr+=dr;nc+=dc;}}
-    }
-    for(const ti of caps){
-      const nb=bd.slice();nb[ti]=p;nb[i]=0;
-      if(s.variant==='swapsies'&&bd[ti])nb[ti]=col==='w'?bd[ti].toUpperCase():bd[ti].toLowerCase();
-      const score=qsearch(nb,col,alpha,beta,s);
-      if(score>=beta)return beta;if(score>alpha)alpha=score;
-    }
-  }
-  return alpha;
-}
-
-function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s,deadline){
-  if(performance.now()>deadline)return null; // time check
-  if(depth<=0)return qsearch(bd,col,alpha,beta,s);
+function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s){
+  if(depth<=0) return evalBd(bd,col);
   const tmp={bd,turn,cas,ep,hm:0,fm:0,variant:s.variant,tps:s.tps,walls:s.walls,check:false};
   const legal=genLegal(tmp);
   if(!legal.length){
@@ -543,10 +508,9 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s,deadline){
     if(tmp.check)return max?-99999+depth:99999-depth;
     return 0;
   }
-  // MVV-LVA ordering
   legal.sort((a,b)=>{
-    const va=bd[a.t]?(VAL[bd[a.t].toLowerCase()]||0)-(VAL[bd[a.f].toLowerCase()]||0/100):0;
-    const vb=bd[b.t]?(VAL[bd[b.t].toLowerCase()]||0)-(VAL[bd[b.f].toLowerCase()]||0/100):0;
+    const va=bd[a.t]?(VAL[bd[a.t].toLowerCase()]||0):0;
+    const vb=bd[b.t]?(VAL[bd[b.t].toLowerCase()]||0):0;
     return vb-va;
   });
   let bestM=legal[0];
@@ -556,8 +520,7 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s,deadline){
       const nb=applyBd(bd,mv,s);const nt=turn==='w'?'b':'w';const nc={...cas};const piece=bd[mv.f];
       if(piece.toLowerCase()==='k'){if(pc(piece)==='w'){nc.K=0;nc.Q=0;}else{nc.k=0;nc.q=0;}}
       const ne=mv.db?(mv.f+(pc(piece)==='w'?-8:8)):-1;
-      const r=ab(nb,nt,nc,ne,depth-1,alpha,beta,0,col,s,deadline);
-      if(r===null)return null; // timeout
+      const r=ab(nb,nt,nc,ne,depth-1,alpha,beta,0,col,s);
       if(r>best){best=r;bestM=mv;}alpha=Math.max(alpha,best);if(beta<=alpha)break;
     }
     return{sc:best,mv:bestM};
@@ -567,8 +530,7 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s,deadline){
       const nb=applyBd(bd,mv,s);const nt=turn==='w'?'b':'w';const nc={...cas};const piece=bd[mv.f];
       if(piece.toLowerCase()==='k'){if(pc(piece)==='w'){nc.K=0;nc.Q=0;}else{nc.k=0;nc.q=0;}}
       const ne=mv.db?(mv.f+(pc(piece)==='w'?-8:8)):-1;
-      const r=ab(nb,nt,nc,ne,depth-1,alpha,beta,1,col,s,deadline);
-      if(r===null)return null;
+      const r=ab(nb,nt,nc,ne,depth-1,alpha,beta,1,col,s);
       if(r<best){best=r;bestM=mv;}beta=Math.min(beta,best);if(beta<=alpha)break;
     }
     return{sc:best,mv:bestM};
@@ -576,75 +538,11 @@ function ab(bd,turn,cas,ep,depth,alpha,beta,max,col,s,deadline){
 }
 
 function getAIMove(){
-  const s=G;const maxDepth=AI_DEPTH[s.diff]||3;const timeLimit=AI_TIME[s.diff]||1000;
+  const s=G;const depth=s.diff==='hard'?3:s.diff==='medium'?2:1;
   const legal=genLegal(s);if(!legal.length)return null;if(legal.length===1)return legal[0];
-  const deadline=performance.now()+timeLimit;
-  let best=null;
-  for(let d=1;d<=maxDepth;d++){
-    const r=ab(s.bd,s.turn,s.cas,s.ep,d,-Infinity,Infinity,1,s.aiColor,s,deadline);
-    if(r===null)break; // timed out
-    best=r;
-    if(Math.abs(r.sc)>90000)break; // forced mate
-  }
-  if(!best)best={mv:legal[0],sc:0};
-  // Easy: add small random noise
-  if(s.diff==='easy'&&legal.length>1){
-    const scored=legal.map(m=>{const nb=applyBd(s.bd,m,s);return{m,sc:evalBd(nb,s.aiColor)+(Math.random()*40-20)};});
-    scored.sort((a,b)=>b.sc-a.sc);
-    return scored[0].m;
-  }
-  return best.mv;
+  const r=ab(s.bd,s.turn,s.cas,s.ep,depth,-Infinity,Infinity,1,s.aiColor,s);
+  return r.mv||legal[0];
 }
-
-// ========== PARTICLE FX ==========
-const fxEl=document.getElementById('fx'),fxC=fxEl.getContext('2d');
-let parts=[];let shake={x:0,y:0,i:0,d:0.88};
-function rfx(){fxEl.width=innerWidth;fxEl.height=innerHeight;}
-addEventListener('resize',rfx);rfx();
-
-function spark(x,y,col,n=10){
-  for(let i=0;i<n;i++){
-    const a=Math.random()*Math.PI*2,sp=2+Math.random()*4;
-    parts.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,l:1,dl:0.01+Math.random()*0.015,sz:2+Math.random()*4,c:col});
-  }
-}
-function sparkMv(fi,ti){
-  const b=document.getElementById('board'),rc=b.getBoundingClientRect();const sw=rc.width/8,sh=rc.height/8;
-  const[fr,fc]=i2rc(fi),[tr,tc]=i2rc(ti);
-  const x0=rc.left+fc*sw+sw/2,y0=rc.top+fr*sh+sh/2,x1=rc.left+tc*sw+sw/2,y1=rc.top+tr*sh+sh/2;
-  for(let t=0;t<4;t++){const l=t/4;spark(x0+(x1-x0)*l,y0+(y1-y0)*l,'rgba(180,70,255,0.7)',2);}
-  spark(x1,y1,'rgba(255,215,0,0.8)',4);
-}
-function sparkCap(idx){
-  const b=document.getElementById('board'),rc=b.getBoundingClientRect();const sw=rc.width/8,sh=rc.height/8;const[r,c]=i2rc(idx);
-  spark(rc.left+c*sw+sw/2,rc.top+r*sh+sh/2,'rgba(255,70,70,0.85)',14);
-}
-function sparkTP(idx){
-  const b=document.getElementById('board'),rc=b.getBoundingClientRect();const sw=rc.width/8,sh=rc.height/8;const[r,c]=i2rc(idx);
-  const x=rc.left+c*sw+sw/2,y=rc.top+r*sh+sh/2;
-  for(let i=0;i<14;i++){const a=(i/14)*Math.PI*2,rad=10+Math.random()*20;
-    parts.push({x:x+Math.cos(a)*rad,y:y+Math.sin(a)*rad,vx:Math.cos(a)*1.5,vy:Math.sin(a)*1.5,l:1,dl:0.02,sz:3,c:'rgba(180,70,255,0.85)'});}
-}
-function doShake(n){shake.i=n;}
-
-function tickFX(){
-  fxC.clearRect(0,0,fxEl.width,fxEl.height);
-  for(let i=parts.length-1;i>=0;i--){
-    const p=parts[i];
-    p.x+=p.vx;p.y+=p.vy;p.vy+=0.12; // gravity
-    p.vx*=0.99; // drag
-    p.l-=p.dl;
-    if(p.l<=0||p.y>fxEl.height+10){parts.splice(i,1);continue;}
-    fxC.globalAlpha=Math.max(0,p.l);fxC.fillStyle=p.c;fxC.beginPath();fxC.arc(p.x,p.y,Math.max(0.5,p.sz*p.l),0,Math.PI*2);fxC.fill();
-  }
-  fxC.globalAlpha=1;
-  if(shake.i>0.1){
-    shake.x=(Math.random()-0.5)*shake.i*2;shake.y=(Math.random()-0.5)*shake.i*2;shake.i*=shake.d;
-    document.getElementById('game-screen').style.transform=`translate(${shake.x}px,${shake.y}px)`;
-  }else{shake.i=0;document.getElementById('game-screen').style.transform='';}
-  requestAnimationFrame(tickFX);
-}
-tickFX();
 
 // ========== RENDER ==========
 function render(){
@@ -736,9 +634,9 @@ function showPromo(f,t){
 function execMv(mv){
   const s=G,cap=s.bd[mv.t],f=mv.f,t=mv.t,hadCap=cap||mv.ep;
   makeMv(s,mv);
-  if(hadCap){sndCap();sparkCap(t);doShake(5);}else sndMove();
-  sparkMv(f,t);
-  if(s.variant==='teleports'&&s.tps.includes(t)){const other=s.tps[0]===t?s.tps[1]:s.tps[0];setTimeout(()=>{sndTP();sparkTP(other);},150);toast('🌀 Teleported!');}
+  if(hadCap){sndCap();}else sndMove();
+  
+  if(s.variant==='teleports'&&s.tps.includes(t)){const other=s.tps[0]===t?s.tps[1]:s.tps[0];setTimeout(()=>{sndTP();},150);toast('🌀 Teleported!');}
   if(s.variant==='swapsies'&&hadCap)toast('🔄 Swapped!');
   if(s.check)sndCheck();
   s.sel=-1;s.lmoves=[];render();
@@ -754,9 +652,9 @@ function runAI(){
     if(mv){
       const cap=s.bd[mv.t],f=mv.f,t=mv.t,hadCap=cap||mv.ep;
       makeMv(s,mv);
-      if(hadCap){sndCap();sparkCap(t);doShake(3);}else sndMove();
-      sparkMv(f,t);
-      if(s.variant==='teleports'&&s.tps.includes(t)){const other=s.tps[0]===t?s.tps[1]:s.tps[0];setTimeout(()=>{sndTP();sparkTP(other);},150);toast('🌀 AI teleported!');}
+      if(hadCap){sndCap();}else sndMove();
+      
+      if(s.variant==='teleports'&&s.tps.includes(t)){const other=s.tps[0]===t?s.tps[1]:s.tps[0];setTimeout(()=>{sndTP();},150);toast('🌀 AI teleported!');}
       if(s.variant==='swapsies'&&hadCap)toast('🔄 AI swapped!');
       if(s.check)sndCheck();
     }
@@ -770,7 +668,7 @@ function showEnd(){
   const legal=genLegal(tmp);const inC=isAttacked(s.bd,findK(s.bd,s.turn),s.turn==='w'?'b':'w',s);
   if(!legal.length&&inC){
     const w=s.turn==='w'?'b':'w';
-    if(w===s.pColor){t.textContent='🎉 You Win!';m.textContent='Checkmate! Congratulations!';sndWin();doShake(7);for(let i=0;i<3;i++)setTimeout(()=>spark(Math.random()*innerWidth,Math.random()*innerHeight*0.4,['rgba(255,215,0,0.8)','rgba(180,70,255,0.8)','rgba(77,200,255,0.8)'][0|Math.random()*3],10),i*150);}
+    if(w===s.pColor){t.textContent='🎉 You Win!';m.textContent='Checkmate! Congratulations!';sndWin();}
     else{t.textContent='😞 You Lose';m.textContent='Checkmate! Better luck next time.';sndLose();}
   }else{t.textContent='🤝 Draw';m.textContent='The game ended in a draw.';}
   ov.classList.add('on');
