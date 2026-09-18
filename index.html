@@ -6,7 +6,7 @@
 <title>Funky Chess</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;700;800&display=swap');
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{--r:12px;--sq-l:#f0e4cc;--sq-d:#b58863;}
 
 [data-theme="dark"]{
@@ -44,7 +44,7 @@
 html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);}
 
 
-.screen{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .3s,transform .3s;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 10px;}
+.screen{display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity .3s,transform .3s;}
 .screen.hidden{opacity:0;pointer-events:none;transform:scale(0.97);}
 #title-screen{background:var(--bg);overflow:auto;padding:20px;}
 .logo{font-family:'Fredoka',sans-serif;font-size:clamp(2.4rem,7vw,4.5rem);font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:float 3.5s ease-in-out infinite;line-height:1.1;}
@@ -53,15 +53,16 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
 .section{margin:0.5rem 0;text-align:center;width:100%;max-width:440px;}
 .section label{display:block;font-size:0.68rem;color:var(--accent);margin-bottom:0.3rem;font-weight:800;letter-spacing:2px;text-transform:uppercase;}
 .btn-row{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;}
-.btn{padding:8px 14px;border:2px solid var(--btn-border);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .15s;background:var(--btn-bg);color:var(--text);outline:none;}
+.btn{padding:8px 14px;border:2px solid var(--btn-border);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;cursor:pointer;transition:all .15s;background:var(--btn-bg);color:var(--text);outline:none;touch-action:manipulation;}
 .btn:hover{transform:translateY(-1px);box-shadow:0 3px 12px rgba(196,77,255,0.2);}
 .btn:active{transform:scale(0.96);}
 .btn.sel{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:rgba(255,255,255,0.2);box-shadow:0 0 14px rgba(196,77,255,0.25);}
-.btn-go{padding:14px 40px;font-size:1.15rem;margin-top:1.2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;border-radius:50px;cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:700;letter-spacing:2px;box-shadow:0 4px 24px rgba(255,107,157,0.3);transition:all .2s;outline:none;}
+.btn-go{padding:14px 40px;font-size:1.15rem;margin-top:1.2rem;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;color:#fff;border-radius:50px;cursor:pointer;font-family:'Fredoka',sans-serif;font-weight:700;letter-spacing:2px;box-shadow:0 4px 24px rgba(255,107,157,0.3);transition:all .2s;outline:none;touch-action:manipulation;}
 .btn-go:hover{transform:scale(1.03);}
 .btn-go:active{transform:scale(0.97);}
 .gh-link{margin-top:1.4rem;font-size:0.72rem;opacity:.7;}
 .gh-link a{color:var(--accent3);text-decoration:none;border-bottom:1px dashed var(--accent3);}
+.version{margin-top:0.5rem;font-size:0.62rem;opacity:.4;letter-spacing:1px;}
 .rules-box{margin-top:0.8rem;max-width:440px;padding:10px 14px;background:var(--card);border-radius:var(--r);border:1px solid var(--btn-border);font-size:0.72rem;line-height:1.5;color:var(--muted);text-align:left;}
 .rules-box strong{color:var(--accent3);}
 .theme-btn{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:2px solid var(--btn-border);background:var(--btn-bg);color:var(--text);font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all .2s;}
@@ -190,6 +191,7 @@ html,body{height:100%;overflow:hidden;font-family:'Nunito',sans-serif;background
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
+  <div class="version">v1.0.0</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
