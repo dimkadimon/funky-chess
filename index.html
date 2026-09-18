@@ -273,7 +273,7 @@ const flipI=i=>56-(i&~7)+(i&7);
 let G={bd:[],turn:'w',cas:{K:1,Q:1,k:1,q:1},ep:-1,hm:0,fm:1,
   variant:'teleports',tps:[],walls:[],pColor:'w',diff:'easy',
   sel:-1,lmoves:[],hist:[],capW:[],capB:[],
-  over:false,check:false,lastM:null,thinking:false,stack:[],aiColor:'b'};
+  over:false,check:false,lastM:null,thinking:false,stack:[],aiColor:'b',posHist:[]};
 
 function initBd(){
   const b=Array(64).fill(0);
@@ -313,8 +313,9 @@ function isAttacked(bd,idx,by,s){
   // King
   for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
     if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;
-    if(!onB(nr,nc))continue;
-    let cc2=nc;if(torus)cc2=((nc%8)+8)%8;
+    let cc2=nc;
+    if(torus){cc2=((nc%8)+8)%8;if(nr<0||nr>=8)continue;}
+    else if(!onB(nr,nc))continue;
     const p=bd[rc2i(nr,cc2)];if(p&&pc(p)===by&&p.toLowerCase()==='k')return 1;
   }
   // Pawns (don't wrap)
@@ -385,8 +386,10 @@ function genPseudo(bd,col,s){
       }
     }else if(t==='k'){
       for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){
-        if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;if(!onB(nr,nc))continue;
-        let cc2=nc;if(torus)cc2=((nc%8)+8)%8;
+        if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;
+        let cc2=nc;
+        if(torus){cc2=((nc%8)+8)%8;if(nr<0||nr>=8)continue;}
+        else if(!onB(nr,nc))continue;
         const ti=rc2i(nr,cc2);if(isW(ti))continue;
         const tgt=bd[ti];if(!tgt||pc(tgt)===en)m.push({f:i,t:ti});
       }
@@ -455,7 +458,7 @@ function genLegal(s){
 
 // ========== MAKE/UNMAKE ==========
 function makeMv(s,mv){
-  s.stack.push({bd:s.bd.slice(),turn:s.turn,cas:{...s.cas},ep:s.ep,hm:s.hm,fm:s.fm,capW:s.capW.slice(),capB:s.capB.slice(),lastM:s.lastM,over:s.over,check:s.check,tps:s.tps.slice(),walls:s.walls.slice()});
+  s.stack.push({bd:s.bd.slice(),turn:s.turn,cas:{...s.cas},ep:s.ep,hm:s.hm,fm:s.fm,capW:s.capW.slice(),capB:s.capB.slice(),lastM:s.lastM,over:s.over,check:s.check,tps:s.tps.slice(),walls:s.walls.slice(),posHist:s.posHist.slice()});
   const p=s.bd[mv.f],col=pc(p),cap=s.bd[mv.t];
   if(cap){if(col==='w')s.capW.push(cap);else s.capB.push(cap);}
   if(mv.ep){const epP=s.bd[mv.t+(col==='w'?8:-8)];if(epP){if(col==='w')s.capW.push(epP);else s.capB.push(epP);}}
@@ -485,9 +488,13 @@ function makeMv(s,mv){
   }
   if(s.hm>=100){s.over=true;return{s:'draw',r:'50-move rule'};}
   if(isInsuff(s.bd)){s.over=true;return{s:'draw',r:'insufficient material'};}
+  s.posHist.push(posKey(s));
+  if(is3fold(s)){s.over=true;return{s:'draw',r:'threefold repetition'};}
   return null;
 }
 function isInsuff(bd){const p={w:[],b:[]};for(let i=0;i<64;i++)if(bd[i]){const c=pc(bd[i]);p[c].push(bd[i].toLowerCase());}if(p.w.length===1&&p.b.length===1)return 1;if(p.w.length===1&&p.b.length===2&&(p.b.includes('b')||p.b.includes('n')))return 1;if(p.b.length===1&&p.w.length===2&&(p.w.includes('b')||p.w.includes('n')))return 1;return 0;}
+function posKey(s){return s.bd.join(',')+s.turn+s.cas.K+s.cas.Q+s.cas.k+s.cas.q+s.ep;}
+function is3fold(s){const key=posKey(s);let n=0;for(let i=0;i<s.posHist.length;i++)if(s.posHist[i]===key)n++;return n>=3;}
 function undoMv(s){if(!s.stack.length)return;Object.assign(s,s.stack.pop());s.hist.pop();}
 
 // ========== AI ==========
@@ -703,6 +710,8 @@ function showEnd(){
     m.textContent=s.turn===s.pColor?'You have no legal moves — it's a draw!':'AI has no legal moves — it's a draw!';
   }else if(s.hm>=100){
     t.textContent='🤝 Draw';m.textContent='50-move rule — too many moves without captures or pawn pushes.';
+  }else if(is3fold(s)){
+    t.textContent='🤝 Draw';m.textContent='Threefold repetition — the same position occurred 3 times.';
   }else if(isInsuff(s.bd)){
     t.textContent='🤝 Draw';m.textContent='Insufficient material — neither side can checkmate.';
   }else{
@@ -729,6 +738,7 @@ function startGame(){
   s.sel=-1;s.lmoves=[];s.hist=[];s.capW=[];s.capB=[];
   s.over=false;s.check=false;s.lastM=null;s.thinking=false;s.stack=[];
   setupVariant();
+  s.posHist=[posKey(s)];
   document.getElementById('title-screen').classList.add('hidden');
   document.getElementById('game-screen').classList.remove('hidden');
   document.getElementById('ov-end').classList.remove('on');
