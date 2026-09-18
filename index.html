@@ -441,9 +441,9 @@ function applyBd(bd,mv,s){
     nb[mv.t]=pc(p)==='w'?capType.toUpperCase():capType;
   }
   if(s.variant==='teleports'&&s.tps.length===2){
-    const[a,b]=s.tps;
-    if(mv.t===a){if(!nb[b]||pc(nb[b])!==pc(nb[a])){nb[b]=nb[a];nb[a]=0;}}
-    else if(mv.t===b){if(!nb[a]||pc(nb[a])!==pc(nb[b])){nb[a]=nb[b];nb[b]=0;}}
+    const[a,b]=s.tps;const tp=nb[mv.t];const isP=tp&&tp.toLowerCase()==='p';
+    if(mv.t===a){if(!nb[b]||(!isP&&pc(nb[b])!==pc(nb[a]))){nb[b]=nb[a];nb[a]=0;}}
+    else if(mv.t===b){if(!nb[a]||(!isP&&pc(nb[a])!==pc(nb[b]))){nb[a]=nb[b];nb[b]=0;}}
   }
   return nb;
 }
