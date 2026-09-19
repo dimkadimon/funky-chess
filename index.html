@@ -83,9 +83,6 @@ html,body{height:100%;height:100dvh;overflow:hidden;font-family:'Nunito',sans-se
 .cbtn:hover{background:rgba(196,77,255,0.12);border-color:var(--accent);}
 .cbtn:active{transform:scale(0.88);}
 .badge{font-size:0.6rem;padding:2px 8px;border-radius:20px;background:linear-gradient(135deg,var(--accent2),var(--accent3));color:#fff;font-weight:800;letter-spacing:1px;}
-.cap-sw{display:inline-block;width:13px;height:13px;border-radius:3px;flex:0 0 auto;}
-.cap-sw.sw-w{background:#f0f0f0;border:1px solid #666;}
-.cap-sw.sw-b{background:#20242b;border:1px solid #9aa2ae;}
 .cap-row{display:flex;gap:2px;min-height:24px;align-items:center;padding:0 6px;max-width:540px;flex-wrap:wrap;font-size:1.1rem;opacity:.7;}
 #board-wrap{position:relative;touch-action:none;}
 .board-group{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;}
@@ -223,7 +220,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.7.5</div>
+  <div class="version">v1.7.6</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
@@ -279,7 +276,7 @@ const AC=window.AudioContext||window.webkitAudioContext;
 let ac=null;let muted=false;
 function initAudio(){if(!ac)try{ac=new AC();}catch(e){}if(ac&&ac.state==='suspended')try{ac.resume();}catch(e){}}
 function tone(f,d,t='sine',v=0.1){if(muted)return;initAudio();if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
-const sndMove=()=>tone(520,0.06);
+const sndMove=()=>{tone(300,0.055,'triangle',0.16);setTimeout(()=>tone(165,0.10,'sine',0.12),12);};
 const sndCap=()=>{tone(120,0.15,'sawtooth',0.12);setTimeout(()=>tone(250,0.1,'square',0.07),40);};
 const sndCheck=()=>{tone(600,0.08,'triangle',0.12);setTimeout(()=>tone(900,0.15,'triangle',0.12),80);};
 const sndTP=()=>{tone(300,0.1);setTimeout(()=>tone(600,0.1),70);setTimeout(()=>tone(900,0.08),140);};
@@ -704,15 +701,12 @@ function render(){
   }
 
   // The board is flipped when you play black, so these rows follow YOU: the pieces you
-  // have captured always sit at the bottom next to your own pieces, and the swatch is
-  // coloured for the pieces IN that row (what was actually eaten) rather than being a
-  // fixed white/black square.
+  // have captured always sit at the bottom next to your own pieces.
   const youW=s.pColor!=='b';
   const myCap=youW?s.capW:s.capB, oppCap=youW?s.capB:s.capW;
-  const mySw=youW?'sw-b':'sw-w', oppSw=youW?'sw-w':'sw-b';
-  const row=(list,sw)=>'<span class="cap-sw '+sw+'"></span>'+list.map(p=>pieceImg(p,pc(p)==='w'?'pw':'pb',20)).join('');
-  document.getElementById('cap-me').innerHTML=row(myCap,mySw);
-  document.getElementById('cap-them').innerHTML=row(oppCap,oppSw);
+  const row=list=>list.map(p=>pieceImg(p,pc(p)==='w'?'pw':'pb',20)).join('');
+  document.getElementById('cap-me').innerHTML=row(myCap);
+  document.getElementById('cap-them').innerHTML=row(oppCap);
 
   const ml=document.getElementById('mlist');ml.innerHTML='';
   if(s.variantInfo){const hdr=document.createElement('div');hdr.className='mp';hdr.innerHTML='<span style="color:var(--accent);font-size:0.58rem;font-weight:700;">'+s.variantInfo+'</span>';ml.appendChild(hdr);}
