@@ -83,6 +83,9 @@ html,body{height:100%;height:100dvh;overflow:hidden;font-family:'Nunito',sans-se
 .cbtn:hover{background:rgba(196,77,255,0.12);border-color:var(--accent);}
 .cbtn:active{transform:scale(0.88);}
 .badge{font-size:0.6rem;padding:2px 8px;border-radius:20px;background:linear-gradient(135deg,var(--accent2),var(--accent3));color:#fff;font-weight:800;letter-spacing:1px;}
+.cap-sw{display:inline-block;width:13px;height:13px;border-radius:3px;flex:0 0 auto;}
+.cap-sw.sw-w{background:#f0f0f0;border:1px solid #666;}
+.cap-sw.sw-b{background:#20242b;border:1px solid #9aa2ae;}
 .cap-row{display:flex;gap:2px;min-height:24px;align-items:center;padding:0 6px;max-width:540px;flex-wrap:wrap;font-size:1.1rem;opacity:.7;}
 #board-wrap{position:relative;touch-action:none;}
 .board-group{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;}
@@ -220,7 +223,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.7.4</div>
+  <div class="version">v1.7.5</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
@@ -236,13 +239,13 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     </div>
   </div>
   <div class="board-group">
-  <div class="cap-row" id="cap-b"></div>
+  <div class="cap-row" id="cap-them"></div>
   <div id="board-wrap">
     <div id="board"></div>
     <div id="promo"><h3>Promote Pawn</h3><div class="pchoices" id="pchoices"></div></div>
     <div id="mpanel"><h3 style="display:flex;justify-content:space-between;align-items:center;">📜 Moves <button class="cbtn" id="bCopy" title="Copy moves" style="width:24px;height:24px;font-size:0.7rem;">📋</button></h3><div id="mlist"></div></div>
   </div>
-  <div class="cap-row" id="cap-w"></div>
+  <div class="cap-row" id="cap-me"></div>
   </div>
   <div class="status" id="status">Your turn</div>
   <div class="end-bar" id="ov-end">
@@ -700,8 +703,16 @@ function render(){
     bEl.appendChild(sq);
   }
 
-  document.getElementById('cap-w').innerHTML='⬜ '+s.capW.map(p=>pieceImg(p,'pw',20)).join('');
-  document.getElementById('cap-b').innerHTML='⬛ '+s.capB.map(p=>pieceImg(p,'pb',20)).join('');
+  // The board is flipped when you play black, so these rows follow YOU: the pieces you
+  // have captured always sit at the bottom next to your own pieces, and the swatch is
+  // coloured for the pieces IN that row (what was actually eaten) rather than being a
+  // fixed white/black square.
+  const youW=s.pColor!=='b';
+  const myCap=youW?s.capW:s.capB, oppCap=youW?s.capB:s.capW;
+  const mySw=youW?'sw-b':'sw-w', oppSw=youW?'sw-w':'sw-b';
+  const row=(list,sw)=>'<span class="cap-sw '+sw+'"></span>'+list.map(p=>pieceImg(p,pc(p)==='w'?'pw':'pb',20)).join('');
+  document.getElementById('cap-me').innerHTML=row(myCap,mySw);
+  document.getElementById('cap-them').innerHTML=row(oppCap,oppSw);
 
   const ml=document.getElementById('mlist');ml.innerHTML='';
   if(s.variantInfo){const hdr=document.createElement('div');hdr.className='mp';hdr.innerHTML='<span style="color:var(--accent);font-size:0.58rem;font-weight:700;">'+s.variantInfo+'</span>';ml.appendChild(hdr);}
