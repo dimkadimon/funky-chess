@@ -220,7 +220,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.7.6</div>
+  <div class="version">v1.7.7</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
@@ -275,8 +275,19 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
 const AC=window.AudioContext||window.webkitAudioContext;
 let ac=null;let muted=false;
 function initAudio(){if(!ac)try{ac=new AC();}catch(e){}if(ac&&ac.state==='suspended')try{ac.resume();}catch(e){}}
-function tone(f,d,t='sine',v=0.1){if(muted)return;initAudio();if(!ac)return;try{const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d);}catch(e){}}
-const sndMove=()=>{tone(300,0.055,'triangle',0.16);setTimeout(()=>tone(165,0.10,'sine',0.12),12);};
+function tone(f,d,t='sine',v=0.1,w=0){if(muted)return;initAudio();if(!ac)return;try{const t0=ac.currentTime+w;const o=ac.createOscillator(),g=ac.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,t0);g.gain.exponentialRampToValueAtTime(0.001,t0+d);o.connect(g);g.connect(ac.destination);o.start(t0);o.stop(t0+d);}catch(e){}}
+// Short filtered noise burst. This is what actually makes a piece sound like it is being
+// placed on a board and, unlike a pure low tone, it survives on phone speakers, which
+// reproduce very little below ~400Hz.
+function noise(dur,v,freq,q,w=0){if(muted)return;initAudio();if(!ac)return;try{
+  const n=Math.max(1,Math.floor(ac.sampleRate*dur)),buf=ac.createBuffer(1,n,ac.sampleRate),ch=buf.getChannelData(0);
+  for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*Math.pow(1-i/n,2);
+  const src=ac.createBufferSource();src.buffer=buf;
+  const bp=ac.createBiquadFilter();bp.type='bandpass';bp.frequency.value=freq;bp.Q.value=q;
+  const g=ac.createGain();g.gain.value=v;
+  src.connect(bp);bp.connect(g);g.connect(ac.destination);src.start(ac.currentTime+w);
+}catch(e){}}
+const sndMove=()=>{noise(0.05,0.40,1700,0.9);tone(235,0.12,'triangle',0.24,0.006);};
 const sndCap=()=>{tone(120,0.15,'sawtooth',0.12);setTimeout(()=>tone(250,0.1,'square',0.07),40);};
 const sndCheck=()=>{tone(600,0.08,'triangle',0.12);setTimeout(()=>tone(900,0.15,'triangle',0.12),80);};
 const sndTP=()=>{tone(300,0.1);setTimeout(()=>tone(600,0.1),70);setTimeout(()=>tone(900,0.08),140);};
