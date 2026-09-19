@@ -83,7 +83,11 @@ html,body{height:100%;height:100dvh;overflow:hidden;font-family:'Nunito',sans-se
 .cbtn:hover{background:rgba(196,77,255,0.12);border-color:var(--accent);}
 .cbtn:active{transform:scale(0.88);}
 .badge{font-size:0.6rem;padding:2px 8px;border-radius:20px;background:linear-gradient(135deg,var(--accent2),var(--accent3));color:#fff;font-weight:800;letter-spacing:1px;}
-.cap-row{display:flex;gap:2px;min-height:24px;align-items:center;padding:0 6px;max-width:540px;flex-wrap:wrap;font-size:1.1rem;opacity:.7;}
+.cap-row{display:flex;gap:2px;min-height:26px;align-items:center;padding:0 6px;max-width:540px;flex-wrap:wrap;font-size:1.1rem;opacity:.92;}
+/* Captured pieces sit directly on the page background. A pure-black piece vanishes on
+   the dark theme's #0f0a1e, so outline each piece in its contrasting colour. */
+.cap-row img.pb{filter:drop-shadow(0 0 1.2px rgba(255,255,255,.95)) drop-shadow(0 0 2.5px rgba(255,255,255,.5));}
+.cap-row img.pw{filter:drop-shadow(0 0 1.2px rgba(0,0,0,.7));}
 #board-wrap{position:relative;touch-action:none;}
 .board-group{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;}
 #board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(90vw,90vh - 120px,540px);height:min(90vw,90vh - 120px,540px);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);position:relative;user-select:none;-webkit-user-select:none;}
@@ -220,7 +224,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.7.7</div>
+  <div class="version">v1.7.8</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
@@ -715,7 +719,7 @@ function render(){
   // have captured always sit at the bottom next to your own pieces.
   const youW=s.pColor!=='b';
   const myCap=youW?s.capW:s.capB, oppCap=youW?s.capB:s.capW;
-  const row=list=>list.map(p=>pieceImg(p,pc(p)==='w'?'pw':'pb',20)).join('');
+  const row=list=>list.map(p=>pieceImg(p,pc(p)==='w'?'pw':'pb',22)).join('');
   document.getElementById('cap-me').innerHTML=row(myCap);
   document.getElementById('cap-them').innerHTML=row(oppCap);
 
