@@ -148,7 +148,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
 .pbtn svg{width:36px;height:36px;}
 .pbtn:hover{background:rgba(196,77,255,0.3);transform:scale(1.08);}
 
-#mpanel{position:absolute;right:-200px;top:0;width:190px;height:100%;background:var(--panel-bg);backdrop-filter:blur(8px);padding:8px;overflow-y:auto;transition:right .25s;z-index:40;border-left:2px solid var(--panel-border);border-radius:0 var(--r) var(--r) 0;}
+#mpanel{position:absolute;right:-200px;top:0;width:190px;max-width:70vw;height:100%;background:var(--panel-bg);backdrop-filter:blur(8px);padding:8px;overflow-y:auto;transition:right .25s;z-index:40;border-left:2px solid var(--panel-border);border-radius:0 var(--r) var(--r) 0;}
 #mpanel.on{right:0;}
 #mpanel h3{font-family:'Fredoka',sans-serif;font-size:0.82rem;margin-bottom:4px;color:var(--accent);}
 #mlist{font-size:0.63rem;line-height:1.8;font-family:monospace;}
@@ -220,7 +220,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     <strong>🍩 Torus:</strong> Board wraps left↔right. Pieces exit one edge and enter the other!
   </div>
   <div class="gh-link"><a href="https://github.com/dimkadimon/funky-chess" target="_blank" rel="noopener">⭐ View on GitHub</a></div>
-  <div class="version">v1.7.3</div>
+  <div class="version">v1.7.4</div>
 </div>
 
 <div id="game-screen" class="screen hidden">
@@ -232,6 +232,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
       <button class="cbtn" id="bMenu2" title="Menu">✕</button>
       <button class="cbtn sound-btn" title="Toggle sound">🔊</button>
       <button class="cbtn theme-toggle" title="Toggle theme">🌙</button>
+      <button class="cbtn" id="bMoves" title="Show moves">📜</button>
     </div>
   </div>
   <div class="board-group">
@@ -249,6 +250,7 @@ img.pc,img.pw,img.pb{display:block;pointer-events:none;z-index:2;-webkit-user-se
     <span id="end-m"></span>
     <span class="end-btns">
       <button class="btn sel" id="bRematch">⚔️ Rematch</button>
+      <button class="btn" id="bCopyEnd">📋 Copy</button>
       <button class="btn" id="bMenu">🏠 Menu</button>
     </span>
   </div>
@@ -874,13 +876,33 @@ document.getElementById('confirmYes').addEventListener('click',doLeave);
 document.getElementById('confirmNo').addEventListener('click',()=>document.getElementById('confirmOverlay').classList.remove('on'));
 
 document.getElementById('bMenu').addEventListener('click',doLeave);
+document.getElementById('bMoves').addEventListener('click',()=>{document.getElementById('mpanel').classList.toggle('on');});
+document.getElementById('bCopyEnd').addEventListener('click',()=>document.getElementById('bCopy').click());
 document.getElementById('bMenu2').addEventListener('click',goToMenu);
 document.getElementById('bUndo').addEventListener('click',()=>{if(G.over||G.thinking)return;if(G.stack.length>=2&&G.turn===G.pColor){undoMv(G);undoMv(G);G.sel=-1;G.lmoves=[];render();toast('↩ Undo');}});
 document.getElementById('bCopy').addEventListener('click',()=>{
   const moves=G.hist.map((h,i)=>{const num=Math.floor(i/2)+1;return i%2===0?num+'. '+h.n:h.n;}).join(' ');
   const text=(G.variantInfo?G.variantInfo+' ':'')+moves;
-  navigator.clipboard.writeText(text).then(()=>toast('📋 Moves copied!')).catch(()=>toast('Copy failed'));
+  copyText(text);
 });
+// navigator.clipboard needs a secure context and is still blocked on some mobile
+// browsers, so fall back to a selection-based copy instead of just failing.
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(()=>toast('📋 Moves copied!')).catch(()=>legacyCopy(t));
+  }else legacyCopy(t);
+}
+function legacyCopy(t){
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=t;ta.setAttribute('readonly','');
+    ta.style.cssText='position:fixed;top:0;left:0;opacity:0;';
+    document.body.appendChild(ta);ta.select();ta.setSelectionRange(0,t.length);
+    const ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast(ok?'📋 Moves copied!':'Copy failed');
+  }catch(e){toast('Copy failed');}
+}
 document.getElementById('bRematch').addEventListener('click',()=>{document.getElementById('ov-end').classList.remove('on');startGame();});
 
 // Theme
